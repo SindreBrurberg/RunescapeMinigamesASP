@@ -57,7 +57,7 @@ namespace RunscapeMinigames
 			if (disqyalified) {
 				return (name + disqualifyingReason);
 			} else {
-				return (name + ": Skill: " + skill + " TotalXP: " + totalXP + " EventXP: " + eventXP + " Points: " + points + " Level: " + level);
+				return (name + ":\tSkill: " + skill + "\tTotalXP: " + totalXP + "\tEventXP: " + eventXP + "\tPoints: " + points + "\tLevel: " + level);
 			}
 		}
 	}
