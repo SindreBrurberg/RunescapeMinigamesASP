@@ -228,7 +228,6 @@ namespace RunscapeMinigames
                         command.Parameters.AddWithValue("@Points", points);
                         command.Parameters.AddWithValue("@Level", level);
                         int rowsAffected = command.ExecuteNonQuery();
-                        Console.WriteLine(rowsAffected + " row(s) inserted");
                     }         
                 }
             }
