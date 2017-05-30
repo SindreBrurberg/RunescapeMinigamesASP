@@ -16,8 +16,8 @@ namespace RunescapeMinigamesASP.Controllers
 
         public IActionResult ScillingCompetittion()
         {
-            RunescapeMinigames RM = new RunescapeMinigames(8648);
-            ViewData["Message"] = RM.RM;
+            RunescapeMinigames RM = new RunescapeMinigames();
+            ViewData["Message"] = RM.getSQLUsers();
 
             return View();
         }

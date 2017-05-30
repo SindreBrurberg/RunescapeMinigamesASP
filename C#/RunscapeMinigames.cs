@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Linq;
 using System.Security;
+using System.Data.SqlClient;
 
 namespace RunscapeMinigames
 {
@@ -36,8 +37,11 @@ namespace RunscapeMinigames
 	}
 	class user {
 		bool disqyalified = false;
-		string skill, disqualifyingReason;
-		int totalXP, eventXP, level;
+		public string skill {get;}
+		string disqualifyingReason;
+		public int totalXP {get;}
+		public int eventXP {get;}
+		public int level {get;}
 		public int points {get;}
 		public string name {get;}
 		public user (string name, string disqualifyingReason) {
@@ -67,6 +71,7 @@ namespace RunscapeMinigames
 		private List<string> usernames = new List<string>();
 		private List<team> teams = new List<team>();
 		public string RM {get;}
+		public RunescapeMinigames() {}
         public RunescapeMinigames(int id)
         {
 			if (id < 1) {return;}
@@ -148,12 +153,90 @@ namespace RunscapeMinigames
 			// }
 			foreach (user user in usersInfo.OrderBy(user=>user.points)) {
                 if (user.points > 0) {
+					insertDataSQL(user.name, user.skill, user.totalXP, user.eventXP, user.points, user.level);
 					string userString = user.getUser();
 					RM += userString + "\n";
 				}
             }
             // Console.WriteLine ("Got response of {0}", task.Result);
         }
+		private string CS() {
+			SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder();
+                builder.DataSource = "RunescapeMinigames.database.windows.net"; 
+                builder.UserID = "Dethsanius";            
+                builder.Password = "Pass!000";     
+                builder.InitialCatalog = "RunescapeMinigames";
+			return builder.ConnectionString;
+		}
+		public string getSQLUsers() {
+			string stg = "";
+			try 
+            { 
+                using (SqlConnection connection = new SqlConnection(CS()))
+                {
+                    connection.Open();       
+                    StringBuilder sb = new StringBuilder();
+                    sb.Append("SELECT TOP 20 [PK], [Name], [Skill], [TotalXP],[EventXP],[Points],[Level]");
+                    sb.Append("FROM [dbo].[UserTest] ");
+                    String sql = sb.ToString();
+
+                    using (SqlCommand command = new SqlCommand(sql, connection))
+                    {
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+								StringBuilder sbUser = new StringBuilder();
+								sbUser.Append(reader["PK"] + "\t");
+								sbUser.Append(reader["Name"] + "\t");
+								sbUser.Append(reader["Skill"] + "\t");
+								sbUser.Append(reader["TotalXP"] + "\t");
+								sbUser.Append(reader["EventXP"] + "\t");
+								sbUser.Append(reader["Points"] + "\t");
+								sbUser.Append(reader["Level"] + "\n");
+								stg += sbUser.ToString();
+								// Console.WriteLine(reader[0]);
+                                //Console.WriteLine("{0} {1}", reader.GetString(0), reader.GetString(1));
+								//stg += reader.GetString(0) + " " + reader.GetString(1) + "\n";
+                            }
+                        }
+                    }                    
+                }
+            }
+            catch (SqlException e)
+            {
+                Console.WriteLine(e.ToString());
+            }
+			return stg;
+		}
+		private void insertDataSQL(string name, string skill, int totalXP, int eventXP, int points, int level) {
+			try 
+            { 
+                using (SqlConnection connection = new SqlConnection(CS()))
+                {
+                    connection.Open();       
+                    StringBuilder sb = new StringBuilder();
+                    sb.Append("INSERT INTO [dbo].[UserTest] ([Name], [Skill], [TotalXP],[EventXP],[Points],[Level]) ");
+                    sb.Append("VALUES (@Name, @Skill, @TotalXP, @EventXP, @Points, @Level);");
+                    String sql = sb.ToString();
+                    using (SqlCommand command = new SqlCommand(sql, connection))
+                    {
+                        command.Parameters.AddWithValue("@Name", name);
+                        command.Parameters.AddWithValue("@Skill", skill);
+                        command.Parameters.AddWithValue("@TotalXP", totalXP);
+                        command.Parameters.AddWithValue("@EventXP", eventXP);
+                        command.Parameters.AddWithValue("@Points", points);
+                        command.Parameters.AddWithValue("@Level", level);
+                        int rowsAffected = command.ExecuteNonQuery();
+                        Console.WriteLine(rowsAffected + " row(s) inserted");
+                    }         
+                }
+            }
+            catch (SqlException e)
+            {
+                Console.WriteLine(e.ToString());
+            }
+		}
         private void getUserInfo(string page) {
             string eventPage = page.Substring(page.IndexOf("<div class=\"events_wrap\">")).Remove(page.IndexOf("<div class=\"page_footer\">") - page.IndexOf("<div class=\"events_wrap\">"));
 			int Sub = eventPage.IndexOf("class=\"regular\">"); 
