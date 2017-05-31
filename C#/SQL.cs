@@ -82,13 +82,26 @@ namespace SQL {
                         Console.WriteLine("Invalid Clan");
                         return;
                     }     
+                    SqlCommand cmdCount = new SqlCommand("SELECT count(*) from [dbo].[User] WHERE name = @Name", connection);
+                    cmdCount.Parameters.AddWithValue("@Name", name);
+                    int count = (int)cmdCount.ExecuteScalar();
                     StringBuilder sb = new StringBuilder();
-                    sb.Append("INSERT INTO [dbo].[User] ([Name], [Attack], [Strength], [Defence], [Ranged], [Prayer], [Magic], [Constitution], [Crafting], [Mining], [Smithing], [Fishing]");
-                    sb.Append(", [Cooking], [Firemaking], [Woodcutting], [Runecrafting], [Dungeoneering], [Agility], [Herblore], [Thieving], [Fletching], [Slayer], [Farming]");
-                    sb.Append(", [Construction], [Hunter], [Summoning], [Divination], [Invention], [Overall], [ClanID])");
-                    sb.Append("VALUES (@Name, @Attack, @Strength, @Defence, @Ranged, @Prayer, @Magic, @Constitution, @Crafting, @Mining, @Smithing, @Fishing, @Cooking, @Firemaking");
-                    sb.Append(", @Woodcutting, @Runecrafting, @Dungeoneering, @Agility, @Herblore, @Thieving, @Fletching, @Slayer, @Farming, @Construction, @Hunter, @Summoning, @Divination");
-                    sb.Append(", @Invention, @Overall, @ClanID);");
+                    if (count > 0) {
+                        sb.Append("UPDATE [dbo].[User] SET  [Attack] = @Attack, [Strength] = @Strength, [Defence] = @Defence, [Ranged] = @Ranged, ");
+                        sb.Append("[Prayer] = @Prayer, [Magic] = @Magic, [Constitution] = @Constitution, [Crafting] = @Crafting, [Mining] = @Mining, ");
+                        sb.Append("[Smithing] = @Smithing, [Fishing] = @Fishing, [Cooking] = @Cooking, [Firemaking] = @Firemaking, [Woodcutting] = @Woodcutting, ");
+                        sb.Append("[Runecrafting] = @Runecrafting, [Agility] = @Agility, [Herblore] = @Herblore, [Thieving] = @Thieving, [Fletching] = @Fletching, ");
+                        sb.Append("[Slayer] = @Slayer, [Farming] = @Farming, [Construction] = @Construction, [Hunter] = @Hunter, [Summoning] = @Summoning, ");
+                        sb.Append("[Divination] = @Divination, [Invention] = @Invention, [Overall] = @Overall, [ClanID] = @ClanID ");
+                        sb.Append("WHERE name = @name");
+                    } else {
+                        sb.Append("INSERT INTO [dbo].[User] ([Name], [Attack], [Strength], [Defence], [Ranged], [Prayer], [Magic], [Constitution], [Crafting], [Mining], [Smithing], [Fishing]");
+                        sb.Append(", [Cooking], [Firemaking], [Woodcutting], [Runecrafting], [Dungeoneering], [Agility], [Herblore], [Thieving], [Fletching], [Slayer], [Farming]");
+                        sb.Append(", [Construction], [Hunter], [Summoning], [Divination], [Invention], [Overall], [ClanID])");
+                        sb.Append("VALUES (@Name, @Attack, @Strength, @Defence, @Ranged, @Prayer, @Magic, @Constitution, @Crafting, @Mining, @Smithing, @Fishing, @Cooking, @Firemaking");
+                        sb.Append(", @Woodcutting, @Runecrafting, @Dungeoneering, @Agility, @Herblore, @Thieving, @Fletching, @Slayer, @Farming, @Construction, @Hunter, @Summoning, @Divination");
+                        sb.Append(", @Invention, @Overall, @ClanID);"); 
+                    }
                     String sql = sb.ToString();
                     using (SqlCommand command = new SqlCommand(sql, connection))
                     {
@@ -123,7 +136,7 @@ namespace SQL {
                         command.Parameters.AddWithValue("@Overall", Overall);
                         command.Parameters.AddWithValue("@ClanId", ClanID);
                         command.ExecuteNonQuery();
-                    }         
+                    }        
                 }
             }
             catch (SqlException e)

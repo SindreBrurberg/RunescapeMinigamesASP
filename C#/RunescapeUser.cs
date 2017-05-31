@@ -36,99 +36,28 @@ namespace RunscapeUser {
                 Console.WriteLine(username);
                 JObject json = JObject.Parse(userPage);
                 if (json["error"] != null) {
-                    Console.WriteLine("Error: {0}: {1}",username,json["error"].Value<string>());
+                    userPage = MakeAsyncRequest("http://services.runescape.com/m=hiscore/index_lite.ws?player="+ username.Replace(" ","+"), "text/html");
+                    int[] skillXP = new int[27];
+                    long overall = 0;
+                    for (int i = -1; i < skillXP.Length; i++) {
+                        if (i == -1) {
+                            //Console.WriteLine(userPage);
+                            //Console.WriteLine(userPage.Split(Environment.NewLine.ToCharArray())[0]);
+                            overall = Int64.Parse(userPage.Split(Environment.NewLine.ToCharArray())[i+1].Split(',')[2]);
+                        }else {
+                            skillXP[i]=Int32.Parse(userPage.Split(Environment.NewLine.ToCharArray())[i+1].Split(',')[2]);
+                        }
+                    }
+                    sql.addUser(username, skillXP[0], skillXP[1], skillXP[2], skillXP[3], skillXP[4], skillXP[5], skillXP[6], skillXP[7], skillXP[8], skillXP[9], skillXP[10],
+                         skillXP[11], skillXP[12], skillXP[13], skillXP[14], skillXP[15], skillXP[16], skillXP[17], skillXP[18], skillXP[19], skillXP[20], skillXP[21], 
+                         skillXP[22], skillXP[23], skillXP[24], skillXP[25], skillXP[26], overall, clan);
                 } else {
                     int[] skillXP = new int[27];
                     long overall = (long)json.SelectToken("totalxp");
-                    Console.WriteLine(overall);
+                    // Console.WriteLine(overall);
                     for (int i = 0; i < skillXP.Length; i++) {
                         skillXP[i]=json["skillvalues"][i]["xp"].Value<int>();
                     }
-                    /*foreach (JObject skill in json["skillvalues"]){
-                        switch (skill["id"].Value<int>()) {
-                            case 0:
-                                skillXP[0]=skill["xp"].Value<int>();
-                                break;
-                            case 1:
-                                skillXP[1]=skill["xp"].Value<int>();
-                                break;
-                            case 2:
-                                skillXP[2]=skill["xp"].Value<int>();
-                                break;
-                            case 3:
-                                skillXP[3]=skill["xp"].Value<int>();
-                                break;
-                            case 4:
-                                skillXP[4]=skill["xp"].Value<int>();
-                                break;
-                            case 5:
-                                skillXP[5]=skill["xp"].Value<int>();
-                                break;
-                            case 6:
-                                skillXP[6]=skill["xp"].Value<int>();
-                                break;
-                            case 7:
-                                skillXP[7]=skill["xp"].Value<int>();
-                                break;
-                            case 8:
-                                skillXP[8]=skill["xp"].Value<int>();
-                                break;
-                            case 9:
-                                skillXP[9]=skill["xp"].Value<int>();
-                                break;
-                            case 10:
-                                skillXP[10]=skill["xp"].Value<int>();
-                                break;
-                            case 11:
-                                skillXP[11]=skill["xp"].Value<int>();
-                                break;
-                            case 12:
-                                skillXP[12]=skill["xp"].Value<int>();
-                                break;
-                            case 13:
-                                skillXP[13]=skill["xp"].Value<int>();
-                                break;
-                            case 14:
-                                skillXP[14]=skill["xp"].Value<int>();
-                                break;
-                            case 15:
-                                skillXP[15]=skill["xp"].Value<int>();
-                                break;
-                            case 16:
-                                skillXP[16]=skill["xp"].Value<int>();
-                                break;
-                            case 17:
-                                skillXP[17]=skill["xp"].Value<int>();
-                                break;
-                            case 18:
-                                skillXP[18]=skill["xp"].Value<int>();
-                                break;
-                            case 19:
-                                skillXP[19]=skill["xp"].Value<int>();
-                                break;
-                            case 20:
-                                skillXP[20]=skill["xp"].Value<int>();
-                                break;
-                            case 21:
-                                skillXP[21]=skill["xp"].Value<int>();
-                                break;
-                            case 22:
-                                skillXP[22]=skill["xp"].Value<int>();
-                                break;
-                            case 23:
-                                skillXP[23]=skill["xp"].Value<int>();
-                                break;
-                            case 24:
-                                skillXP[24]=skill["xp"].Value<int>();
-                                break;
-                            case 25:
-                                skillXP[25]=skill["xp"].Value<int>();
-                                break;
-                            case 26:
-                                skillXP[26]=skill["xp"].Value<int>();
-                                break;
-                        }
-                    }*/
                     sql.addUser(username, skillXP[0], skillXP[1], skillXP[2], skillXP[3], skillXP[4], skillXP[5], skillXP[6], skillXP[7], skillXP[8], skillXP[9], skillXP[10],
                          skillXP[11], skillXP[12], skillXP[13], skillXP[14], skillXP[15], skillXP[16], skillXP[17], skillXP[18], skillXP[19], skillXP[20], skillXP[21], 
                          skillXP[22], skillXP[23], skillXP[24], skillXP[25], skillXP[26], overall, clan);
