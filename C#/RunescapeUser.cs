@@ -10,16 +10,54 @@ using SQL;
 namespace RunscapeUser {
     class Clan {
         public Clan(string clan) {
-            string clanPage=MakeAsyncRequest("http://www.runeclan.com/clan/" + clan + "/members", "text/html");
+            List<string> usernames = new List<string>();
+            string clanPage = MakeAsyncRequest("http://www.runeclan.com/clan/" + clan + "/members", "text/html");
 			while (clanPage.Contains("database error")) {
 				clanPage = MakeAsyncRequest("http://www.runeclan.com/clan/" + clan + "/members", "text/html");
 			}
             foreach (string username in getUsernames(clanPage)) {
-                Console.WriteLine(username);
+                usernames.Add(username);
             }
             //Number of pages for any runeclan website
-            Console.WriteLine(getInnerPage(clanPage, "<div class=\"pagination_page\">Page 1 of ", "</div><div class=\"pagination_select\"><span class=\"disabled\">"));
-            
+            int numberOfPages = Int32.Parse(getInnerPage(clanPage, "<div class=\"pagination_page\">Page 1 of ", "</div><div class=\"pagination_select\"><span class=\"disabled\">"));
+            for (int i = 2; i <= numberOfPages; i++) {
+                clanPage = MakeAsyncRequest("http://www.runeclan.com/clan/" + clan + "/members/" + i, "text/html");
+                while (clanPage.Contains("database error")) {
+                    clanPage = MakeAsyncRequest("http://www.runeclan.com/clan/" + clan + "/members/" + i, "text/html");
+                }
+                foreach (string username in getUsernames(clanPage)) {
+                    usernames.Add(username);
+                }
+            }
+            foreach (string username in usernames) {
+                String userPage = MakeAsyncRequest("http://www.runeclan.com/user/"+ username.Replace(" ","+"), "text/html");
+                Console.WriteLine(username);
+                if (userPage.IndexOf("alt=\"Private Profile\"") != -1) {
+                    Console.WriteLine("{0} PRIVATE PROFILE",username);
+                } else if (userPage.IndexOf("We are not currently tracking this users stats.") != -1) {
+                    Console.WriteLine("{0} Not Tracking",username);
+                } else {
+                    String[] skills = new String[28]{"Attack", "Strength", "Defence", "Ranged", "Prayer", "Magic", "Constitution", "Crafting", 
+                        "Mining", "Smithing", "Fishing", "Cooking", "Firemaking", "Woodcutting", "Runecrafting", "Dungeoneering", "Agility", 
+                        "Herblore", "Thieving", "Fletching", "Slayer", "Farming", "Construction", "Hunter", "Summoning", "Divination", "Invention", "Overall"};
+                    List<int> skillXP = new List<int>();
+                    long overall = 0;
+                    foreach (string skill in skills) {
+                        string isdss = "onmousemove=\"xpTrackerBox('" + skill.ToLower();
+                        int isds = userPage.IndexOf(isdss);
+                        string xp = getInnerPage(userPage.Substring(isds + isdss.Length), "<td class=\"xp_tracker_cxp\">", "</td><td class=\"xp_tracker_rsrank altcolor").Replace(",", "");
+                        if (skill != "Overall") {
+                            skillXP.Add(Int32.Parse(xp));
+                        }else {
+                            overall = Int64.Parse(xp);
+                        }
+                    }
+                    Console.WriteLine(skillXP.Count);
+                    sql.addUser(username, skillXP[0], skillXP[1], skillXP[2], skillXP[3], skillXP[4], skillXP[5], skillXP[6], skillXP[7], skillXP[8], skillXP[9], skillXP[10],
+                         skillXP[11], skillXP[12], skillXP[13], skillXP[14], skillXP[15], skillXP[16], skillXP[17], skillXP[18], skillXP[19], skillXP[20], skillXP[21], 
+                         skillXP[22], skillXP[23], skillXP[24], skillXP[25], skillXP[26], overall, clan);
+                }
+            }
         }
         private string getInnerPage(string page, string start, string end) {
             // Console.WriteLine(page);

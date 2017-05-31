@@ -14,7 +14,7 @@ namespace RunescapeMinigamesASP
         public static void Main(string[] args)
         {
             Clan cl = new Clan("Consentus");
-            RunescapeMinigames RM = new RunescapeMinigames(8648);
+            //RunescapeMinigames RM = new RunescapeMinigames(8648);
             var host = new WebHostBuilder()
                 .UseKestrel()
                 .UseContentRoot(Directory.GetCurrentDirectory())
