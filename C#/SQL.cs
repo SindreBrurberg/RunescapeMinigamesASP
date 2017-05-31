@@ -52,9 +52,10 @@ namespace SQL {
             }
 			return stg;
 		}
-		public static void addUser(string name, int Attack, int Strength, int Defence, int Ranged, int Prayer, int Magic, int Constitution, int Crafting, 
-        int Mining, int Smithing, int Fishing, int Cooking, int Firemaking, int Woodcutting, int Runecrafting, int Dungeoneering, int Agility, 
-        int Herblore, int Thieving, int Fletching, int Slayer, int Farming, int Construction, int Hunter, int Summoning, int Divination, int Invention, long Overall, string Clan) {
+        //The structure of this is because of the ID per skill!!!
+		public static void addUser(string name, int Attack, int Defence, int Strength, int Constitution, int Ranged, int Prayer, int Magic, int Cooking, int Woodcutting, 
+        int Fletching, int Fishing, int Firemaking, int Crafting, int Smithing, int Mining, int Herblore, int Agility, int Thieving, int Slayer, int Farming, int Runecrafting, 
+        int Construction, int Hunter, int Summoning, int Dungeoneering, int Divination, int Invention, long Overall, string Clan) {
             int ClanID = 0;
 			try 
             { 

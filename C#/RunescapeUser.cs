@@ -6,6 +6,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using SQL;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace RunscapeUser {
     class Clan {
@@ -30,29 +32,103 @@ namespace RunscapeUser {
                 }
             }
             foreach (string username in usernames) {
-                String userPage = MakeAsyncRequest("http://www.runeclan.com/user/"+ username.Replace(" ","+"), "text/html");
+                String userPage = MakeAsyncRequest("https://apps.runescape.com/runemetrics/profile/profile?user="+ username.Replace(" ","+") + "&activities=0", "text/html");
                 Console.WriteLine(username);
-                if (userPage.IndexOf("alt=\"Private Profile\"") != -1) {
-                    Console.WriteLine("{0} PRIVATE PROFILE",username);
-                } else if (userPage.IndexOf("We are not currently tracking this users stats.") != -1) {
-                    Console.WriteLine("{0} Not Tracking",username);
+                JObject json = JObject.Parse(userPage);
+                if (json["error"] != null) {
+                    Console.WriteLine("Error: {0}: {1}",username,json["error"].Value<string>());
                 } else {
-                    String[] skills = new String[28]{"Attack", "Strength", "Defence", "Ranged", "Prayer", "Magic", "Constitution", "Crafting", 
-                        "Mining", "Smithing", "Fishing", "Cooking", "Firemaking", "Woodcutting", "Runecrafting", "Dungeoneering", "Agility", 
-                        "Herblore", "Thieving", "Fletching", "Slayer", "Farming", "Construction", "Hunter", "Summoning", "Divination", "Invention", "Overall"};
-                    List<int> skillXP = new List<int>();
-                    long overall = 0;
-                    foreach (string skill in skills) {
-                        string isdss = "onmousemove=\"xpTrackerBox('" + skill.ToLower();
-                        int isds = userPage.IndexOf(isdss);
-                        string xp = getInnerPage(userPage.Substring(isds + isdss.Length), "<td class=\"xp_tracker_cxp\">", "</td><td class=\"xp_tracker_rsrank altcolor").Replace(",", "");
-                        if (skill != "Overall") {
-                            skillXP.Add(Int32.Parse(xp));
-                        }else {
-                            overall = Int64.Parse(xp);
-                        }
+                    int[] skillXP = new int[27];
+                    long overall = (long)json.SelectToken("totalxp");
+                    Console.WriteLine(overall);
+                    for (int i = 0; i < skillXP.Length; i++) {
+                        skillXP[i]=json["skillvalues"][i]["xp"].Value<int>();
                     }
-                    Console.WriteLine(skillXP.Count);
+                    /*foreach (JObject skill in json["skillvalues"]){
+                        switch (skill["id"].Value<int>()) {
+                            case 0:
+                                skillXP[0]=skill["xp"].Value<int>();
+                                break;
+                            case 1:
+                                skillXP[1]=skill["xp"].Value<int>();
+                                break;
+                            case 2:
+                                skillXP[2]=skill["xp"].Value<int>();
+                                break;
+                            case 3:
+                                skillXP[3]=skill["xp"].Value<int>();
+                                break;
+                            case 4:
+                                skillXP[4]=skill["xp"].Value<int>();
+                                break;
+                            case 5:
+                                skillXP[5]=skill["xp"].Value<int>();
+                                break;
+                            case 6:
+                                skillXP[6]=skill["xp"].Value<int>();
+                                break;
+                            case 7:
+                                skillXP[7]=skill["xp"].Value<int>();
+                                break;
+                            case 8:
+                                skillXP[8]=skill["xp"].Value<int>();
+                                break;
+                            case 9:
+                                skillXP[9]=skill["xp"].Value<int>();
+                                break;
+                            case 10:
+                                skillXP[10]=skill["xp"].Value<int>();
+                                break;
+                            case 11:
+                                skillXP[11]=skill["xp"].Value<int>();
+                                break;
+                            case 12:
+                                skillXP[12]=skill["xp"].Value<int>();
+                                break;
+                            case 13:
+                                skillXP[13]=skill["xp"].Value<int>();
+                                break;
+                            case 14:
+                                skillXP[14]=skill["xp"].Value<int>();
+                                break;
+                            case 15:
+                                skillXP[15]=skill["xp"].Value<int>();
+                                break;
+                            case 16:
+                                skillXP[16]=skill["xp"].Value<int>();
+                                break;
+                            case 17:
+                                skillXP[17]=skill["xp"].Value<int>();
+                                break;
+                            case 18:
+                                skillXP[18]=skill["xp"].Value<int>();
+                                break;
+                            case 19:
+                                skillXP[19]=skill["xp"].Value<int>();
+                                break;
+                            case 20:
+                                skillXP[20]=skill["xp"].Value<int>();
+                                break;
+                            case 21:
+                                skillXP[21]=skill["xp"].Value<int>();
+                                break;
+                            case 22:
+                                skillXP[22]=skill["xp"].Value<int>();
+                                break;
+                            case 23:
+                                skillXP[23]=skill["xp"].Value<int>();
+                                break;
+                            case 24:
+                                skillXP[24]=skill["xp"].Value<int>();
+                                break;
+                            case 25:
+                                skillXP[25]=skill["xp"].Value<int>();
+                                break;
+                            case 26:
+                                skillXP[26]=skill["xp"].Value<int>();
+                                break;
+                        }
+                    }*/
                     sql.addUser(username, skillXP[0], skillXP[1], skillXP[2], skillXP[3], skillXP[4], skillXP[5], skillXP[6], skillXP[7], skillXP[8], skillXP[9], skillXP[10],
                          skillXP[11], skillXP[12], skillXP[13], skillXP[14], skillXP[15], skillXP[16], skillXP[17], skillXP[18], skillXP[19], skillXP[20], skillXP[21], 
                          skillXP[22], skillXP[23], skillXP[24], skillXP[25], skillXP[26], overall, clan);
